@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>LiveCANNBench – Leaderboard</title>
+  <link rel="icon" href="static/img/favicon.png">
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;margin:0;padding:0 16px 48px;color:#111}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:16px 0}
+    nav a{margin-right:12px;text-decoration:none;color:#06f}
+    input,select,button{padding:8px;margin:6px 6px 0 0}
+    table{border-collapse:collapse;width:100%;margin-top:12px}
+    th,td{border:1px solid #ddd;padding:8px;text-align:left}
+    th{background:#f6f8fa;position:sticky;top:0}
+    .muted{color:#666}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Leaderboard</h1>
+    <nav>
+      <a href="index.html">Overview</a>
+      <a href="leaderboard.html">Leaderboard</a>
+    </nav>
+  </header>
+
+  <section class="muted">
+    <p>Rendered from <code>static/data/leaderboard.json</code>.</p>
+  </section>
+
+  <section>
+    <label>Filter model: <input id="q" placeholder="e.g., Qwen, Llama"></label>
+    <label>Sort by:
+      <select id="sortBy">
+        <option value="pass1">Pass@1</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </label>
+    <button id="apply">Apply</button>
+
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>#</th><th>Model</th><th>Pass@1</th><th>Easy</th><th>Medium</th><th>Hard</th>
+        </tr>
+      </thead>
+      <tbody><tr><td colspan="6">Loading…</td></tr></tbody>
+    </table>
+  </section>
+
+  <script type="module">
+    let rows = [];
+    async function load(){
+      const res = await fetch('static/data/leaderboard.json',{cache:'no-store'});
+      rows = await res.json();
+      render();
+    }
+    function pct(x){ return (x*100).toFixed(1)+'%'; }
+    function render(){
+      const q = document.querySelector('#q').value.toLowerCase();
+      const sortBy = document.querySelector('#sortBy').value;
+      const filtered = rows.filter(r => r.model.toLowerCase().includes(q));
+      filtered.sort((a,b)=>(b[sortBy]??0)-(a[sortBy]??0));
+      const tbody = document.querySelector('#tbl tbody');
+      tbody.innerHTML = filtered.map((r,i)=>`
+        <tr>
+          <td>${i+1}</td><td>${r.model}</td>
+          <td>${pct(r.pass1)}</td>
+          <td>${pct(r.easy)}</td>
+          <td>${pct(r.medium)}</td>
+          <td>${pct(r.hard)}</td>
+        </tr>`).join('') || `<tr><td colspan="6">No results</td></tr>`;
+    }
+    document.querySelector('#apply').addEventListener('click', render);
+    load().catch(err=>{
+      document.querySelector('#tbl tbody').innerHTML =
+        `<tr><td colspan="6">Failed to load data: ${err}</td></tr>`;
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
