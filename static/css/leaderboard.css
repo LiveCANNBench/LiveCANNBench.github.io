@@ -1,0 +1,40 @@
+/* Sticky header + compact spacing */
+.table.leaderboard thead th {
+  position: sticky; top: 0; z-index: 2; background: #f6f8fa;
+}
+.table.leaderboard th, .table.leaderboard td { vertical-align: middle; }
+
+/* Sort caret */
+.sortable { cursor: pointer; user-select: none; }
+.sortable .sort-caret::after { content: '↕'; margin-left: .25rem; color: #999; font-size: .8em; }
+.sortable.is-asc .sort-caret::after { content: '↑'; color: #3273dc; }
+.sortable.is-desc .sort-caret::after { content: '↓'; color: #3273dc; }
+
+/* Pretty metric bars */
+.metric {
+  --p: 0%;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: .5rem;
+  min-width: 220px;
+}
+.metric .pct { font-variant-numeric: tabular-nums; width: 64px; }
+.metric .bar {
+  position: relative; height: 12px; border-radius: 6px; background: #eef1f5; overflow: hidden;
+}
+.metric .bar::before {
+  content: ""; position: absolute; inset: 0;
+  width: var(--p);
+  background: linear-gradient(90deg, #9ad0ff, #3273dc);  /* Bulma primary gradient */
+  opacity: .9;
+}
+.metric .label { display: none; } /* reserved for future sub-metrics */
+
+/* Controls box spacing */
+.controls { margin-bottom: 1rem; }
+
+/* Mobile: let table scroll horizontally */
+.table-container { overflow-x: auto; }
+
+/* Subtle hover highlight */
+.table.is-hoverable tbody tr:hover { background: #f8fbff; }
