@@ -1,0 +1,5 @@
+[
+  {"model":"Qwen-2.5-Coder-7B","pass1":0.642,"easy":0.86,"medium":0.61,"hard":0.34},
+  {"model":"Llama-3.1-8B-Instruct","pass1":0.598,"easy":0.82,"medium":0.55,"hard":0.30},
+  {"model":"DeepSeek-Coder-V2-Lite","pass1":0.575,"easy":0.80,"medium":0.52,"hard":0.28}
+]
