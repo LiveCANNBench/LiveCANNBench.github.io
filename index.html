@@ -30,6 +30,23 @@
     });
   </script>
 </head>
+
+<script type="module">
+(async function(){
+  const r = await fetch('static/data/overview.json');
+  const d = await r.json();
+  const el = document.querySelector('#summary');
+  if (!el) return;
+  el.innerHTML = `
+    <h2>Current Window</h2>
+    <p>${d.window.start} → ${d.window.end}</p>
+    <ul>
+      <li>Problems: ${d.problems}</li>
+      <li>Models tracked: ${d.models}</li>
+    </ul>`;
+})();
+</script>
+  
 <body>
 
 <!-- Navbar (simple) -->
@@ -48,6 +65,7 @@
         <span class="icon"><i class="fas fa-home"></i></span>
       </a>
       <!-- Add more nav items later if needed -->
+      <a class="navbar-item" href="leaderboard.html">Leaderboard</a>
     </div>
   </div>
 </nav>
