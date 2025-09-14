@@ -4,82 +4,106 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>LiveCANNBench – Leaderboard</title>
-  <link rel="icon" href="static/img/favicon.png">
-  <style>
-    body{font-family:system-ui,Arial,sans-serif;margin:0;padding:0 16px 48px;color:#111}
-    header{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:16px 0}
-    nav a{margin-right:12px;text-decoration:none;color:#06f}
-    input,select,button{padding:8px;margin:6px 6px 0 0}
-    table{border-collapse:collapse;width:100%;margin-top:12px}
-    th,td{border:1px solid #ddd;padding:8px;text-align:left}
-    th{background:#f6f8fa;position:sticky;top:0}
-    .muted{color:#666}
-  </style>
+
+  <!-- Bulma + icons already used by your index -->
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+
+  <!-- Our custom leaderboard styles -->
+  <link rel="stylesheet" href="static/css/leaderboard.css">
+  <link rel="icon" href="static/images/favicon.svg">
 </head>
 <body>
-  <header>
-    <h1>Leaderboard</h1>
-    <nav>
-      <a href="index.html">Overview</a>
-      <a href="leaderboard.html">Leaderboard</a>
-    </nav>
-  </header>
 
-  <section class="muted">
-    <p>Rendered from <code>static/data/leaderboard.json</code>.</p>
-  </section>
+<!-- Minimal navbar (same look as your index) -->
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow:1;justify-content:center;">
+      <a class="navbar-item" href="./">
+        <span class="icon"><i class="fas fa-home"></i></span>
+      </a>
+      <a class="navbar-item is-active" href="leaderboard.html">Leaderboard</a>
+    </div>
+  </div>
+</nav>
 
-  <section>
-    <label>Filter model: <input id="q" placeholder="e.g., Qwen, Llama"></label>
-    <label>Sort by:
-      <select id="sortBy">
-        <option value="pass1">Pass@1</option>
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-    </label>
-    <button id="apply">Apply</button>
+<section class="section">
+  <div class="container is-max-desktop">
+    <h1 class="title is-3">Leaderboard</h1>
+    <p class="subtitle is-6 has-text-grey" id="meta">Loading window…</p>
 
-    <table id="tbl">
-      <thead>
-        <tr>
-          <th>#</th><th>Model</th><th>Pass@1</th><th>Easy</th><th>Medium</th><th>Hard</th>
-        </tr>
-      </thead>
-      <tbody><tr><td colspan="6">Loading…</td></tr></tbody>
-    </table>
-  </section>
+    <!-- Controls -->
+    <div class="box controls">
+      <div class="field is-grouped is-flex-wrap-wrap">
+        <p class="control has-icons-left">
+          <input id="q" class="input" type="text" placeholder="Filter model (e.g., Qwen, Llama)">
+          <span class="icon is-small is-left"><i class="fas fa-search"></i></span>
+        </p>
+        <p class="control">
+          <div class="select">
+            <select id="sortBy" aria-label="Sort by">
+              <option value="pass1">Sort: Pass@1</option>
+              <option value="easy">Sort: Easy</option>
+              <option value="medium">Sort: Medium</option>
+              <option value="hard">Sort: Hard</option>
+            </select>
+          </div>
+        </p>
+        <p class="control">
+          <button id="apply" class="button is-link">
+            <span class="icon"><i class="fas fa-filter"></i></span><span>Apply</span>
+          </button>
+        </p>
+      </div>
+    </div>
 
-  <script type="module">
-    let rows = [];
-    async function load(){
-      const res = await fetch('static/data/leaderboard.json',{cache:'no-store'});
-      rows = await res.json();
-      render();
-    }
-    function pct(x){ return (x*100).toFixed(1)+'%'; }
-    function render(){
-      const q = document.querySelector('#q').value.toLowerCase();
-      const sortBy = document.querySelector('#sortBy').value;
-      const filtered = rows.filter(r => r.model.toLowerCase().includes(q));
-      filtered.sort((a,b)=>(b[sortBy]??0)-(a[sortBy]??0));
-      const tbody = document.querySelector('#tbl tbody');
-      tbody.innerHTML = filtered.map((r,i)=>`
-        <tr>
-          <td>${i+1}</td><td>${r.model}</td>
-          <td>${pct(r.pass1)}</td>
-          <td>${pct(r.easy)}</td>
-          <td>${pct(r.medium)}</td>
-          <td>${pct(r.hard)}</td>
-        </tr>`).join('') || `<tr><td colspan="6">No results</td></tr>`;
-    }
-    document.querySelector('#apply').addEventListener('click', render);
-    load().catch(err=>{
-      document.querySelector('#tbl tbody').innerHTML =
-        `<tr><td colspan="6">Failed to load data: ${err}</td></tr>`;
-      console.error(err);
-    });
-  </script>
+    <!-- Table -->
+    <div class="table-container">
+      <table class="table is-striped is-hoverable is-fullwidth leaderboard">
+        <thead>
+          <tr>
+            <th class="is-narrow">#</th>
+            <th>Model</th>
+            <th class="sortable" data-key="pass1">Pass@1 <span class="sort-caret"></span></th>
+            <th class="sortable" data-key="easy">Easy <span class="sort-caret"></span></th>
+            <th class="sortable" data-key="medium">Medium <span class="sort-caret"></span></th>
+            <th class="sortable" data-key="hard">Hard <span class="sort-caret"></span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="6" class="has-text-centered">Loading leaderboard data…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="is-size-7 has-text-grey" id="updated">Last updated: —</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p class="is-size-7 has-text-grey">
+        Template adapted from <a href="https://github.com/nerfies/nerfies.github.io">nerfies.github.io</a>. 
+        Leaderboard style inspired by <a href="https://livecodebench.github.io/leaderboard.html">LiveCodeBench</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // mobile burger toggle
+  document.addEventListener('DOMContentLoaded', () => {
+    const b = document.querySelector('.navbar-burger');
+    const m = document.querySelector('.navbar-menu');
+    if (b && m) b.addEventListener('click', () => { b.classList.toggle('is-active'); m.classList.toggle('is-active'); });
+  });
+</script>
+<script type="module" src="static/js/leaderboard.js"></script>
 </body>
 </html>
